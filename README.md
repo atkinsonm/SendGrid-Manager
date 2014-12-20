@@ -8,9 +8,9 @@ Functions to help manage email recipients in SendGrid
 * search for email address
 * replace email address with another
 * view detailed information on a list
-** number of email addresses
-** link to statistics
-** email addresses in the list
+  * number of email addresses
+  * link to statistics
+  * email addresses in the list
 
 Pages designed to be displayed on a WordPress website
 

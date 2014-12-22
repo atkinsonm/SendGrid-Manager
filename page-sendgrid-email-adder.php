@@ -25,12 +25,26 @@ get_header(); ?>
                     require "sendgrid-add-email.php";
                     require "sendgrid-get-lists.php";
                     // SendGrid list custom code
-                    // SendGrid Add 
+                    // SendGrid Add
+                    $delims = array(
+                        'comma'         => ',',
+                        'semicolon'     => ';',
+                        'space'         => ' '
+                    );
                     if (empty($_POST)) {
                         echo "<h1 class=\"entry-title\">Add Email Address to Lists</h1>";
                         echo "<form id=\"form_add_email\" method=\"post\" action=\"".get_permalink()."\">";
-                        echo "<input type=\"text\" name=\"address\" size=\"100\" placeholder=\"Email address, or multiple addresses separated by spaces.\"><br>";
-                    
+                        echo "<input type=\"text\" name=\"address\" size=\"100\" placeholder=\"Email address, or multiple addresses separated by a ";
+                        $numDelims = count($delims);
+                        $i = 0;
+                        foreach ($delims as $name => $value) {
+                            if(++$i != $numDelims) {
+                                echo $name  . ", "; 
+                            } else {
+                                echo "or " . $name;
+                            }
+                        }
+                        echo "\"><br>";
                         $i = 0;
                         $lists = getLists(null);
                         foreach ($lists as &$value) {
@@ -46,7 +60,10 @@ get_header(); ?>
                         foreach($_POST as $name => $value) {
                             //If the data begins with "address", use it.
                             if ($name == "address") {
-                                $emailBulk = explode(" ", $value);
+                                foreach ($delims as $name => $entry) {
+                                    $emailDelimited = str_replace($entry, ",", $value);
+                                }
+                                $emailBulk = explode(",", $emailDelimited);
                             } elseif (strlen(strstr($name,"list"))>0) {
                                 $valueF = str_replace('-', ' ', $value);
                                 foreach ($emailBulk as $email) {

@@ -24,18 +24,46 @@ get_header(); ?>
                     require "sendgrid-remove-email.php";
                     require "sendgrid-get-lists.php";
                     // SendGrid list custom code
-                    // SendGrid Add 
+                    // SendGrid Add
+                    $delims = array(
+                        'comma'         => ',',
+                        'semicolon'     => ';',
+                        'space'         => ' '
+                    );
                     if (empty($_POST)) {
                         echo "<h1 class=\"entry-title\">Remove Email Address from Lists</h1>";
+                        echo "<button onclick=\"selectAll(true)\">Select all</button><br>";
+                        echo "<button onclick=\"selectAll(false)\">Deselect all</button><br>";
+                        echo " 
+                            <script>
+                            function selectAll(checktoggle) {
+                                var checkboxes = new Array(); 
+                                checkboxes = document.getElementsByClassName('checkable');
+
+                                for (var i=0; i<checkboxes.length; i++)  {
+                                    checkboxes[i].checked = checktoggle;
+                                }
+                            }
+                            </script>
+                        ";
                         echo "<form id=\"form_remove_email\" method=\"post\" action=\"".get_permalink()."\">";
-                        echo "<input type=\"text\" name=\"address\" size=\"100\" placeholder=\"Email address, or multiple addresses separated by spaces.\"><br>";
-                        echo "<input type=\"checkbox\" id=\"selectall\"/><strong>Select All</strong><br>";
+                        echo "<input type=\"text\" name=\"address\" size=\"100\" placeholder=\"Email address, or multiple addresses separated by a ";
+                        $numDelims = count($delims);
+                        $i = 0;
+                        foreach ($delims as $name => $value) {
+                            if(++$i != $numDelims) {
+                                echo $name  . ", "; 
+                            } else {
+                                echo "or " . $name;
+                            }
+                        }
+                        echo "\"><br>";
                         $i = 0;
                         $lists = getLists();
                         foreach ($lists as &$value) {
                             $value = substr($value, 0, strlen($value)-1);
                             $valueF = str_replace(' ', '-', $value);
-                            echo "<input class=\"checkbox1\" type=\"checkbox\" name=\"list$i\" value=$valueF>$value<br>";
+                            echo "<input class=\"checkable\" type=\"checkbox\" name=\"list$i\" value=$valueF>$value<br>";
                             $i = $i + 1;
                         }
                     
@@ -45,7 +73,10 @@ get_header(); ?>
                         foreach($_POST as $name => $value) {
                             //If the data begins with "address", use it.
                             if ($name == "address") {
-                                $emailBulk = explode(" ", $value);
+                                foreach ($delims as $name => $entry) {
+                                    $emailDelimited = str_replace($entry, ",", $value);
+                                }
+                                $emailBulk = explode(",", $emailDelimited);
                             } elseif (strlen(strstr($name,"list"))>0) {
                                 $valueF = str_replace('-', ' ', $value);
                                 foreach ($emailBulk as $email) {
